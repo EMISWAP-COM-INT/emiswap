@@ -1,7 +1,7 @@
 const { accounts } = require('@openzeppelin/test-environment');
 const { contract } = require('./twrapper');
 
-const { expectRevert, time, ether } = require('@openzeppelin/test-helpers');
+const { expectRevert, expectEvent, time, ether } = require('@openzeppelin/test-helpers');
 
 const { expect } = require('chai');
 
@@ -9,6 +9,8 @@ const ImplV1 = contract.fromArtifact('DummyImplementation');
 const ImplV2 = contract.fromArtifact('DummyImplementationV2');
 const ProxyAdmin = contract.fromArtifact('EmiVotableProxyAdmin');
 const EmiVoting = contract.fromArtifact('EmiVoting');
+const MockUSDX = contract.fromArtifact('MockUSDX');
+const Timelock = contract.fromArtifact('Timelock');
 const TransparentUpgradeableProxy = contract.fromArtifact('TransparentUpgradeableProxy');
 
 describe('ProxyAdmin', function () {
@@ -21,8 +23,10 @@ describe('ProxyAdmin', function () {
 
   beforeEach(async function () {
     const initializeData = Buffer.from('');
-    this.emiVote = await EmiVoting.new();
-    await this.emiVote.initialize(proxyAdminOwner);
+      this.usdx = await MockUSDX.new();
+      this.usdx.transfer(newAdmin, ether('3000000'));
+      this.timelock = await Timelock.new(proxyAdminOwner, 60*60*24*4);
+      this.emiVote = await EmiVoting.new(this.timelock.address, this.usdx.address, proxyAdminOwner);
 
     this.proxyAdmin = await ProxyAdmin.new(this.emiVote.address, { from: proxyAdminOwner });
     this.proxy = await TransparentUpgradeableProxy.new(
@@ -77,15 +81,16 @@ describe('ProxyAdmin', function () {
 
     context('with authorized account', function () {
       it('upgrades implementation', async function () {
-        let releaseTime = (await time.latest()).add(time.duration.minutes(2));
-        let h = 51940;
-        await this.emiVote.newUpgradeVoting(this.implementationV1.address, this.implementationV2.address, releaseTime, h);
-        await time.increaseTo(releaseTime.add(time.duration.minutes(4)));
-        await this.emiVote.calcVotingResult(h);
- 
-        let j = await this.emiVote.getVotingResult(h);
+        r = await this.emiVote.propose([this.implementationV2.address],[0],['Signature'],['0x1111'],'Test proposal 2', 20);
+        expectEvent.inLogs(r.logs,'ProposalCreated');
+        let pid = r.logs[0].args.id;
+        console.log('Block proposed 2: %d', await time.latestBlock());
 
-        await this.proxyAdmin.upgrade(this.proxy.address, h, { from: proxyAdminOwner });
+	await time.advanceBlockTo(54); // skip some blocks
+        await this.emiVote.castVote(pid, true, {from: newAdmin});
+        await time.advanceBlockTo(94);
+
+        await this.proxyAdmin.upgrade(this.proxy.address, pid, { from: proxyAdminOwner });
         const implementationAddress = await this.proxyAdmin.getProxyImplementation(this.proxy.address);
         expect(implementationAddress).to.be.equal(this.implementationV2.address);
       });
