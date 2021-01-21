@@ -404,6 +404,11 @@ contract EmiVesting is Initializable, Priviledgeable, IEmiVesting {
         }
     }
 
+    function burn() public onlyAdmin {
+      uint bal = IESW(_token).balanceOf(address(this));
+      IESW(_token).burn(address(this), bal);
+    }
+
     function burnLock(address _beneficiary, uint256 idx) public onlyAdmin {
         require(_beneficiary != address(0), "Address should not be zero");
         require(idx < _locksTable[_beneficiary].length, "Wrong lock index");
