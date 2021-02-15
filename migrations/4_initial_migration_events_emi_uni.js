@@ -96,7 +96,8 @@ module.exports = async function (deployer, network, accounts) {
         value1WETH,
         value400DAI,
         valueZERO,
-        valueZERO);
+        valueZERO,
+        accounts[0]);
 
     // DAI-WBTC Add liquidity (11100:1)
     await EmiRouter_deployed.addLiquidity(
@@ -105,7 +106,8 @@ module.exports = async function (deployer, network, accounts) {
         value11100DAI,
         value1WBTC,
         valueZERO,
-        valueZERO);
+        valueZERO,
+        accounts[0]);
 
     // USDC-WBTC Add liquidity (11000:1)
     await EmiRouter_deployed.addLiquidity(
@@ -114,7 +116,8 @@ module.exports = async function (deployer, network, accounts) {
         value11000USDC,
         value1WBTC,
         valueZERO,
-        valueZERO);        
+        valueZERO,
+        accounts[0]);
 
     let liquidityWETH_DAI = await EmiRouter_deployed.getLiquidity( MockWETH_deployed.address, MockDAI_deployed.address  );
     let liquidityDAI_WBTC= await EmiRouter_deployed.getLiquidity( MockDAI_deployed.address, MockWBTC_deployed.address );
@@ -160,7 +163,7 @@ module.exports = async function (deployer, network, accounts) {
     await crowdSale_deployed.fetchCoin(MockWBTC_deployed.address,    0, 3); // WBTC, rate from uniswap
 
     /* EmiVamp can eat liquidity from uiniswap pairs */
-    await EmiVamp_deployed.initialize([pairAddressDAIUSDC, pairAddressDAIWBTC, pairAddressDAIWETH], [0, 0, 0], EmiRouter_deployed.address);
+    await EmiVamp_deployed.initialize([pairAddressDAIUSDC, pairAddressDAIWBTC, pairAddressDAIWETH], [0, 0, 0], EmiRouter_deployed.address, accounts[0]);
     
     console.log("========= EMISWAP ======================================================",        
         "\n emiswap_fee =", emiswap_fee,

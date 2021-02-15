@@ -66,6 +66,21 @@ module.exports = {
             skipDryRun: true,
             network_id: '*',
         },
+        bsctestnet: {
+            provider: () => new HDWalletProvider(process.env.PRIVATE_KEY_BSCTESTNET, process.env.PROVIDER_BSCTESTNET),
+            network_id: 97,
+            confirmations: 5,
+            gasLimit: 12000000,
+            timeoutBlocks: 200,
+            skipDryRun: true
+        },
+        bsc: {
+            provider: () => new HDWalletProvider(process.env.PRIVATE_KEY_BSC, process.env.PROVIDER_BSC),
+            network_id: 56,
+            confirmations: 10,
+            timeoutBlocks: 200,
+            skipDryRun: true
+        },
     },
     compilers: {
         solc: {
