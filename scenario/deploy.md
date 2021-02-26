@@ -241,6 +241,19 @@ If upgrade proxy account differ from main system account, we need to setup admin
         7.2.4 make transaction
 8. repeat for all tokens
 
+## Set crowdsale poolsize
+0. Get CrowdSale Proxy address
+1. Go to Remix -> Open CrowdSale.Full.sol file on file browser
+2. Compile 
+3. go Deploy&run transactions
+4. select contract - CrowdSale
+5. Fill up field "At address" with CrowdSale Proxy address and press "At address" button
+6. On deployed contracs find Crowdsale accordion - open functions list
+7. On function setPoolsize fill up values:
+    7.1 value = 20000000000000000000000000
+    7.2 make transaction
+8. repeat for all tokens
+
 ## Configure ESWc
 0. Get ESWc PROXY Contract Address
 1. Go to Remix -> Open ESW.Full.sol file on file browser

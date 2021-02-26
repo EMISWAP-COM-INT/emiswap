@@ -70,7 +70,7 @@ module.exports = {
             provider: () => new HDWalletProvider(process.env.PRIVATE_KEY_BSCTESTNET, process.env.PROVIDER_BSCTESTNET),
             network_id: 97,
             confirmations: 5,
-            gasLimit: 12000000,
+            gasLimit: 30000000,
             timeoutBlocks: 200,
             skipDryRun: true
         },
@@ -79,6 +79,7 @@ module.exports = {
             network_id: 56,
             confirmations: 10,
             timeoutBlocks: 200,
+            gasLimit: 30000000,
             skipDryRun: true
         },
     },
