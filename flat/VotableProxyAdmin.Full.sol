@@ -2,7 +2,7 @@
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.6.0;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -29,7 +29,7 @@ abstract contract Context {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.6.0;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -43,7 +43,7 @@ pragma solidity >=0.6.0 <0.8.0;
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-abstract contract Ownable is Context {
+contract Ownable is Context {
     address private _owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -99,7 +99,7 @@ abstract contract Ownable is Context {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.6.0;
 
 /**
  * @dev This abstract contract provides a fallback function that delegates all calls to another contract using the EVM
@@ -159,7 +159,7 @@ abstract contract Proxy {
      * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if no other
      * function in the contract matches the call data.
      */
-    fallback () external payable {
+    fallback () payable external {
         _fallback();
     }
 
@@ -167,7 +167,7 @@ abstract contract Proxy {
      * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if call data
      * is empty.
      */
-    receive () external payable {
+    receive () payable external {
         _fallback();
     }
 
@@ -185,7 +185,7 @@ abstract contract Proxy {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity ^0.6.2;
 
 /**
  * @dev Collection of functions related to the address type
@@ -209,7 +209,7 @@ library Address {
      * ====
      */
     function isContract(address account) internal view returns (bool) {
-        // This method relies on extcodesize, which returns 0 for contracts in
+        // This method relies in extcodesize, which returns 0 for contracts in
         // construction, since the code is only stored at the end of the
         // constructor execution.
 
@@ -272,7 +272,7 @@ library Address {
      * _Available since v3.1._
      */
     function functionCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, 0, errorMessage);
+        return _functionCallWithValue(target, data, 0, errorMessage);
     }
 
     /**
@@ -298,38 +298,14 @@ library Address {
      */
     function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage) internal returns (bytes memory) {
         require(address(this).balance >= value, "Address: insufficient balance for call");
+        return _functionCallWithValue(target, data, value, errorMessage);
+    }
+
+    function _functionCallWithValue(address target, bytes memory data, uint256 weiValue, string memory errorMessage) private returns (bytes memory) {
         require(isContract(target), "Address: call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{ value: value }(data);
-        return _verifyCallResult(success, returndata, errorMessage);
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a static call.
-     *
-     * _Available since v3.3._
-     */
-    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
-        return functionStaticCall(target, data, "Address: low-level static call failed");
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
-     * but performing a static call.
-     *
-     * _Available since v3.3._
-     */
-    function functionStaticCall(address target, bytes memory data, string memory errorMessage) internal view returns (bytes memory) {
-        require(isContract(target), "Address: static call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.staticcall(data);
-        return _verifyCallResult(success, returndata, errorMessage);
-    }
-
-    function _verifyCallResult(bool success, bytes memory returndata, string memory errorMessage) private pure returns(bytes memory) {
+        (bool success, bytes memory returndata) = target.call{ value: weiValue }(data);
         if (success) {
             return returndata;
         } else {
@@ -353,7 +329,7 @@ library Address {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.6.0;
 
 
 
@@ -435,7 +411,7 @@ contract UpgradeableProxy is Proxy {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.6.0;
 
 
 /**
@@ -457,16 +433,16 @@ pragma solidity >=0.6.0 <0.8.0;
  * to sudden errors when trying to call a function from the proxy implementation.
  * 
  * Our recommendation is for the dedicated account to be an instance of the {ProxyAdmin} contract. If set up this way,
- * you should think of the `ProxyAdmin` instance as the real administrative interface of your proxy.
+ * you should think of the `ProxyAdmin` instance as the real administrative inerface of your proxy.
  */
 contract TransparentUpgradeableProxy is UpgradeableProxy {
     /**
      * @dev Initializes an upgradeable proxy managed by `_admin`, backed by the implementation at `_logic`, and
      * optionally initialized with `_data` as explained in {UpgradeableProxy-constructor}.
      */
-    constructor(address _logic, address admin_, bytes memory _data) public payable UpgradeableProxy(_logic, _data) {
+    constructor(address _logic, address _admin, bytes memory _data) public payable UpgradeableProxy(_logic, _data) {
         assert(_ADMIN_SLOT == bytes32(uint256(keccak256("eip1967.proxy.admin")) - 1));
-        _setAdmin(admin_);
+        _setAdmin(_admin);
     }
 
     /**
@@ -501,8 +477,8 @@ contract TransparentUpgradeableProxy is UpgradeableProxy {
      * https://eth.wiki/json-rpc/API#eth_getstorageat[`eth_getStorageAt`] RPC call.
      * `0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103`
      */
-    function admin() external ifAdmin returns (address admin_) {
-        admin_ = _admin();
+    function admin() external ifAdmin returns (address) {
+        return _admin();
     }
 
     /**
@@ -514,8 +490,8 @@ contract TransparentUpgradeableProxy is UpgradeableProxy {
      * https://eth.wiki/json-rpc/API#eth_getstorageat[`eth_getStorageAt`] RPC call.
      * `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc`
      */
-    function implementation() external ifAdmin returns (address implementation_) {
-        implementation_ = _implementation();
+    function implementation() external ifAdmin returns (address) {
+        return _implementation();
     }
 
     /**
@@ -590,7 +566,7 @@ contract TransparentUpgradeableProxy is UpgradeableProxy {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.6.0;
 
 
 
@@ -669,7 +645,7 @@ contract ProxyAdmin is Ownable {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.6.0;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -834,7 +810,13 @@ library SafeMath {
 pragma solidity ^0.6.2;
 
 interface IEmiVoting {
-    function getVotingResult(uint256 _hash) external view returns (address);
+  event VotingCreated(uint indexed hash, uint endTime);
+  event VotingFinished(uint indexed hash, uint result);
+
+  function getVoting(uint _hash) external view returns (address, address, uint, uint);
+  function newUpgradeVoting(address _oldContract, address _newContract, uint _votingEndTime, uint _hash) external returns (uint);
+  function getVotingResult(uint _hash) external view returns (address);
+  function calcVotingResult(uint _hash) external;
 }
 
 // File: contracts/VotableProxyAdmin.sol
@@ -848,76 +830,54 @@ pragma solidity ^0.6.2;
 
 
 
-/**
- * @dev Returns the current implementation of `proxy`.
- *
- * Requirements:
- *
- * - This contract must be the admin of `proxy`.
- */
 contract EmiVotableProxyAdmin is Ownable {
-    using SafeMath for uint256;
+  using SafeMath for uint256;
 
-    IEmiVoting private _votingContract;
+  IEmiVoting private _votingContract;
 
- string public codeVersion = "VotableProxyAdmin v1.0-58-gd991927";
-
-    constructor(address _vc) public {
-        require(_vc != address(0), "Voting contract address cannot be 0");
-        _votingContract = IEmiVoting(_vc);
-    }
+  constructor (address _vc) public {
+    require(_vc!=address(0), "Voting contract address cannot be 0");
+    _votingContract = IEmiVoting(_vc);
+  }
 
     /**
      * @dev Returns the current implementation of `proxy`.
-     *
+     * 
      * Requirements:
-     *
+     * 
      * - This contract must be the admin of `proxy`.
      */
-    function getProxyImplementation(TransparentUpgradeableProxy proxy)
-        public
-        view
-        returns (address)
-    {
+    function getProxyImplementation(TransparentUpgradeableProxy proxy) public view returns (address) {
         // We need to manually run the static call since the getter cannot be flagged as view
         // bytes4(keccak256("implementation()")) == 0x5c60da1b
-        (bool success, bytes memory returndata) =
-            address(proxy).staticcall(hex"5c60da1b");
+        (bool success, bytes memory returndata) = address(proxy).staticcall(hex"5c60da1b");
         require(success);
         return abi.decode(returndata, (address));
     }
 
     /**
      * @dev Returns the current admin of `proxy`.
-     *
+     * 
      * Requirements:
-     *
+     * 
      * - This contract must be the admin of `proxy`.
      */
-    function getProxyAdmin(TransparentUpgradeableProxy proxy)
-        public
-        view
-        returns (address)
-    {
+    function getProxyAdmin(TransparentUpgradeableProxy proxy) public view returns (address) {
         // We need to manually run the static call since the getter cannot be flagged as view
         // bytes4(keccak256("admin()")) == 0xf851a440
-        (bool success, bytes memory returndata) =
-            address(proxy).staticcall(hex"f851a440");
+        (bool success, bytes memory returndata) = address(proxy).staticcall(hex"f851a440");
         require(success);
         return abi.decode(returndata, (address));
     }
 
     /**
      * @dev Changes the admin of `proxy` to `newAdmin`.
-     *
+     * 
      * Requirements:
-     *
+     * 
      * - This contract must be the current admin of `proxy`.
      */
-    function changeProxyAdmin(
-        TransparentUpgradeableProxy proxy,
-        address newAdmin
-    ) public onlyOwner {
+    function changeProxyAdmin(TransparentUpgradeableProxy proxy, address newAdmin) public onlyOwner {
         proxy.changeAdmin(newAdmin);
     }
 
@@ -926,15 +886,12 @@ contract EmiVotableProxyAdmin is Ownable {
         _votingContract = IEmiVoting(_newVoting);
     }
 
-    function upgrade(TransparentUpgradeableProxy proxy, uint256 votingHash)
-        public
-        onlyOwner
-    {
-        address impl;
+  function upgrade(TransparentUpgradeableProxy proxy, uint votingHash) public onlyOwner {
+    address impl;
 
-        impl = _votingContract.getVotingResult(votingHash);
-        require(impl != address(0), "Voting has wrong implementation address");
+    impl = _votingContract.getVotingResult(votingHash);
+    require(impl != address(0), "Voting has wrong implementation address");
 
-        proxy.upgradeTo(impl);
-    }
+    proxy.upgradeTo(impl);
+  }
 }
